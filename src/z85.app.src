@@ -1,0 +1,14 @@
+{application, z85,
+ [
+  {description, "An Erlang z85 library"},
+  {vsn, "1"},
+  {modules, [
+             z85
+            ]},
+  {registered, [z85]},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
