@@ -2,7 +2,7 @@
 ZeroMQ Base-85 in erlang
 
 
-# the specification: [32/Z85](http://rfc.zeromq.org/spec:32)
+# Specification: [32/Z85](http://rfc.zeromq.org/spec:32)
 
 This document specifies Z85, a format for representing binary data as printable text. Z85 is a derivative of existing [Ascii85 encoding mechanisms](http://en.wikipedia.org/wiki/Ascii85), modified for better usability, particularly for use in source code.
 
