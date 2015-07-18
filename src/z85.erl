@@ -103,6 +103,7 @@ padding_z85(A, L) ->
 
 -spec do_encode(A :: binary(), Table :: tuple()) -> binary().
 do_encode(A, Table) ->
+	error_logger:info_msg("~p~n", [A]),
 	{Encode_table, _Decode_table} = Table,
 	L32 = [I || <<I:32/unsigned-big>> <= A],
 	Lr85 = binlist_to_r85(L32),
@@ -146,7 +147,11 @@ i_to_r85(I, L) ->
 	B = I rem 85,
 	case A of
 	0 ->
-		[B] ++ L;
+		if length(L) < 4 ->
+			i_to_r85(A, [B] ++ L);
+		true ->
+			[B] ++ L
+		end;
 	_ ->
 		i_to_r85(A, [B] ++ L) 
 	end.

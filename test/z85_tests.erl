@@ -10,9 +10,16 @@ helloworld_test() ->
 	{ok, D} = gen_server:call(Pid, {decode, E}),
 	gen_server:stop(Pid).
 
+random_test() ->
+	{ok, Pid} = z85:start_link(),
+	D = crypto:rand_bytes(16),
+	{ok, E} = gen_server:call(Pid, {encode, D}),
+	{ok, D} = gen_server:call(Pid, {decode, E}),
+	gen_server:stop(Pid).
+
 padding_test() ->
 	{ok, Pid} = z85:start_link(),
-	D = <<"Hello, World!">>,
+	D = crypto:rand_bytes(17),
 	{ok, E} = gen_server:call(Pid, {encode, D}),
 	{ok, D} = gen_server:call(Pid, {decode, E}),
 	gen_server:stop(Pid).
