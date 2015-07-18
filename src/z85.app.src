@@ -10,5 +10,6 @@
                   kernel,
                   stdlib
                  ]},
+  {mod, {z85_app, []}},
   {env, []}
  ]}.

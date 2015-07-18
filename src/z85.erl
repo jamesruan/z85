@@ -60,7 +60,9 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 
 start_link() ->
-	gen_server:start_link(?MODULE, [], []).
+	{ok, Pid} = gen_server:start_link(?MODULE, [], []),
+	register(z85, Pid),
+	{ok, Pid}.
 
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
