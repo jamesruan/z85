@@ -68,56 +68,63 @@ start_link() ->
 
 -spec encode(A :: binary(), Table :: tuple()) -> {ok, binary()}.
 encode(A, T) ->
+	{Encode_table, _Decode_table} = T,
 	S = erlang:byte_size(A) div 4,
 	R = erlang:byte_size(A) rem 4,
 	case R of 
 	0 ->
-		{ok, do_encode(A, T)};
+		{ok, do_encode(A, Encode_table)};
 	R ->
 		L = S * 5 + 5 - (4-R),
-		<<Z85:L/binary, _/binary>> = do_encode(padding_bin(A, 4-R), T),
+		<<Z85:L/binary, _/binary>> = do_encode(padding_bin(A, 4-R), Encode_table),
 		{ok, Z85}
 	end.
 
 -spec decode(A :: binary(), Table :: tuple()) -> {ok, binary()}.
 decode(A, T) ->
+	{_Encode_table, Decode_table} = T,
 	S = erlang:byte_size(A) div 5,
 	R = erlang:byte_size(A) rem 5,
 	case R of 
 	0 ->
-		{ok, do_decode(A, T)};
+		{ok, do_decode(A, Decode_table)};
 	R ->
 		L = S * 4 + 4 - (5-R),
-		<<B:L/binary, _/binary>> = do_decode(padding_z85(A, 5-R), T),
+		<<B:L/binary, _/binary>> = do_decode(padding_z85(A, 5-R), Decode_table),
 		{ok, B}
 	end.
 
 -spec padding_bin(A :: binary(), L :: integer()) -> binary().
 padding_bin(A, L) ->
-	<<A/binary, 0:(L*8)>>.
+	P = rep(<<0>>, L), % padding with smallest value 0 is not optional
+	<<A/binary, P/binary>>.
 
 -spec padding_z85(A :: binary(), L :: integer()) -> binary().
 padding_z85(A, L) ->
-	P = << <<"#">> || _ <- lists:seq(1, L) >>,
+	P = rep(<<"#">>, L), % padding with biggest value 84 is not optional
 	<<A/binary, P/binary>>.
 
--spec do_encode(A :: binary(), Table :: tuple()) -> binary().
+-spec rep(A :: binary(), L :: integer()) -> binary().
+rep(A, L) ->
+	<< <<X>> || <<X>> <- lists:duplicate(L, A) >>.
+
+-spec do_encode(A :: binary(), Table :: [tuple()]) -> binary().
+% encode 4 bytes padded data
 do_encode(A, Table) ->
-	error_logger:info_msg("~p~n", [A]),
-	{Encode_table, _Decode_table} = Table,
 	L32 = [I || <<I:32/unsigned-big>> <= A],
 	Lr85 = binlist_to_r85(L32),
-	erlang:list_to_binary(lists:map(fun (X) -> proplists:get_value(X, Encode_table) end, Lr85)).
+	erlang:list_to_binary(lists:map(fun (X) -> proplists:get_value(X, Table) end, Lr85)).
 
--spec do_decode(A :: binary(), Table :: tuple()) -> binary().
+-spec do_decode(A :: binary(), Table :: [tuple()]) -> binary().
+% decode 5 bytes padded data
 do_decode(A, Table) ->
-	{_Encode_table, Decode_table} = Table,
-	L = lists:map(fun (X) -> proplists:get_value(X, Decode_table) end, erlang:binary_to_list(A)),
+	L = lists:map(fun (X) -> proplists:get_value(X, Table) end, erlang:binary_to_list(A)),
 	Lc5 = split_by(5, L),
 	Lr = r85list_to_bin(Lc5),
 	erlang:list_to_binary(Lr).
 
 -spec split_by(N :: integer(), L :: [integer()]) -> [[integer()]].
+% split list into sublists of length N
 split_by(N, L) ->
 	split_by(N, L, []).
 
@@ -132,7 +139,7 @@ split_by(N, L, R) ->
 	end.
 
 -spec binlist_to_r85(L :: [integer()]) -> [integer()].
-% [ i32() ] -> [ z85() ]
+% [ i32() ] -> [ r85() ]
 binlist_to_r85(L) ->
 	Lr85 = lists:map(fun (I) -> i_to_r85(I) end, L), 
 	lists:foldl(fun(I, Acc) -> Acc ++ I end, [], Lr85).
