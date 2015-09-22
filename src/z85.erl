@@ -20,15 +20,15 @@
 %% ------------------------------------------------------------------
 
 init(_Args) ->
-	L = "0123456789" ++ 
-    	    "abcdefghij" ++
-    	    "klmnopqrst" ++
-    	    "uvwxyzABCD" ++
-    	    "EFGHIJKLMN" ++
-    	    "OPQRSTUVWX" ++
-    	    "YZ.-:+=^!/" ++
-    	    "*?&<>()[]{" ++
-    	    "}@%$#",
+	L = "0123456789" ++
+	    "abcdefghij" ++
+	    "klmnopqrst" ++
+	    "uvwxyzABCD" ++
+	    "EFGHIJKLMN" ++
+	    "OPQRSTUVWX" ++
+	    "YZ.-:+=^!/" ++
+	    "*?&<>()[]{" ++
+	    "}@%$#",
 	Encode_table = lists:zip(lists:seq(0,84), L),
 	Decode_table = lists:zip(L, lists:seq(0,84)),
 	{ok, {Encode_table, Decode_table}}.
@@ -143,7 +143,7 @@ split_by(N, L, R) ->
 -spec binlist_to_r85(L :: [integer()]) -> [integer()].
 % [ i32() ] -> [ r85() ]
 binlist_to_r85(L) ->
-	Lr85 = lists:map(fun (I) -> i_to_r85(I) end, L), 
+	Lr85 = lists:map(fun (I) -> i_to_r85(I) end, L),
 	lists:foldl(fun(I, Acc) -> Acc ++ I end, [], Lr85).
 
 -spec i_to_r85(I :: integer()) -> [integer()].
